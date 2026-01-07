@@ -3,7 +3,7 @@
 	"publisher": "icenveins",
 	"displayName": "Worktree Manager",
 	"description": "Visual Git worktree management",
-	"version": "0.0.2",
+	"version": "0.0.3",
 	"repository": {
 		"url": "https://github.com/icenveins/worktree"
 	},
