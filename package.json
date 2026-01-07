@@ -1,0 +1,154 @@
+{
+	"name": "worktree-manager",
+	"publisher": "icenveins",
+	"displayName": "Worktree Manager",
+	"description": "Visual Git worktree management",
+	"version": "0.0.2",
+	"engines": {
+		"vscode": "^1.85.0"
+	},
+	"categories": [
+		"SCM Providers"
+	],
+	"activationEvents": [
+		"workspaceContains:.git"
+	],
+	"main": "./out/extension.js",
+	"scripts": {
+		"compile": "tsc -p ./",
+		"watch": "tsc -watch -p ./",
+		"lint": "biome check src --write",
+		"test": "mocha -r ts-node/register src/test/unit/**/*.test.ts"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "^2.3.11",
+		"@types/mocha": "^10.0.10",
+		"@types/node": "^20.0.0",
+		"@types/vscode": "^1.85.0",
+		"@vscode/test-electron": "^2.5.2",
+		"glob": "^13.0.0",
+		"mocha": "^11.7.5",
+		"ts-node": "^10.9.2",
+		"typescript": "^5.3.0"
+	},
+	"contributes": {
+		"configuration": {
+			"title": "Worktree Manager",
+			"properties": {
+				"worktreeManager.defaultPath": {
+					"type": "string",
+					"default": "../{branch}",
+					"description": "Default path pattern for new worktrees. Variables: {branch}, {repo}"
+				},
+				"worktreeManager.openBehavior": {
+					"type": "string",
+					"enum": [
+						"newWindow",
+						"sameWindow",
+						"ask"
+					],
+					"default": "ask",
+					"description": "How to open worktrees"
+				},
+				"worktreeManager.showRemoteBranches": {
+					"type": "boolean",
+					"default": true,
+					"description": "Show remote branches in available branches list"
+				}
+			}
+		},
+		"views": {
+			"scm": [
+				{
+					"id": "worktreeManager.worktrees",
+					"name": "Worktrees"
+				},
+				{
+					"id": "worktreeManager.branches",
+					"name": "Available Branches"
+				}
+			]
+		},
+		"commands": [
+			{
+				"command": "worktreeManager.refresh",
+				"title": "Refresh",
+				"icon": "$(refresh)"
+			},
+			{
+				"command": "worktreeManager.create",
+				"title": "Create Worktree",
+				"icon": "$(add)"
+			},
+			{
+				"command": "worktreeManager.open",
+				"title": "Open Worktree"
+			},
+			{
+				"command": "worktreeManager.openNewWindow",
+				"title": "Open in New Window"
+			},
+			{
+				"command": "worktreeManager.remove",
+				"title": "Remove Worktree"
+			},
+			{
+				"command": "worktreeManager.prune",
+				"title": "Prune Stale Worktrees"
+			},
+			{
+				"command": "worktreeManager.lock",
+				"title": "Lock Worktree",
+				"icon": "$(lock)"
+			},
+			{
+				"command": "worktreeManager.unlock",
+				"title": "Unlock Worktree",
+				"icon": "$(unlock)"
+			}
+		],
+		"menus": {
+			"view/title": [
+				{
+					"command": "worktreeManager.refresh",
+					"when": "view == worktreeManager.worktrees",
+					"group": "navigation"
+				},
+				{
+					"command": "worktreeManager.create",
+					"when": "view == worktreeManager.worktrees",
+					"group": "navigation"
+				}
+			],
+			"view/item/context": [
+				{
+					"command": "worktreeManager.open",
+					"when": "viewItem =~ /worktree/"
+				},
+				{
+					"command": "worktreeManager.openNewWindow",
+					"when": "viewItem =~ /worktree/"
+				},
+				{
+					"command": "worktreeManager.lock",
+					"when": "viewItem == worktree || viewItem == worktreeCurrent",
+					"group": "modification"
+				},
+				{
+					"command": "worktreeManager.unlock",
+					"when": "viewItem == worktreeLocked || viewItem == worktreeCurrentLocked",
+					"group": "modification"
+				},
+				{
+					"command": "worktreeManager.remove",
+					"when": "viewItem == worktree && !worktreeManager.isCurrent",
+					"group": "modification"
+				},
+				{
+					"command": "worktreeManager.create",
+					"when": "viewItem == branch"
+				}
+			]
+		}
+	}
+}
