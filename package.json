@@ -13,6 +13,7 @@
 	"categories": [
 		"SCM Providers"
 	],
+	"license": "MIT",
 	"activationEvents": [
 		"workspaceContains:.git"
 	],
