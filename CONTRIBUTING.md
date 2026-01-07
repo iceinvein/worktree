@@ -77,9 +77,27 @@ To publish the extension to the Visual Studio Marketplace:
    
    To bump the version automatically:
    ```bash
-   vsce publish patch  # 0.0.1 -> 0.0.2
-   vsce publish minor  # 0.0.1 -> 0.1.0
    vsce publish major  # 0.0.1 -> 1.0.0
+   ```
+
+## Publishing to Open VSX Registry
+
+To publish to [Open VSX](https://open-vsx.org/) (for VSCodium, etc.):
+
+1. **Create an account** on [open-vsx.org](https://open-vsx.org).
+2. **Create an Access Token** in your account settings.
+3. **Create a Namespace** that matches your `publisher` ID in `package.json`.
+4. **Install `ovsx` CLI**:
+   ```bash
+   npm install -g ovsx
+   ```
+5. **Publish**:
+   ```bash
+   ovsx publish
+   ```
+   Or with a token:
+   ```bash
+   ovsx publish -p <your-token>
    ```
 
 ## Development Guidelines
