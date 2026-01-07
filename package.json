@@ -5,7 +5,7 @@
 	"description": "Visual Git worktree management",
 	"version": "0.0.2",
 	"repository": {
-		"url": "https://github.com/icenveins/worktree-manager"
+		"url": "https://github.com/icenveins/worktree"
 	},
 	"engines": {
 		"vscode": "^1.85.0"
