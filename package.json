@@ -1,11 +1,11 @@
 {
 	"name": "worktree-manager",
-	"publisher": "icenveins",
+	"publisher": "iceinveins",
 	"displayName": "Worktree Manager",
 	"description": "Visual Git worktree management",
 	"version": "0.0.4",
 	"repository": {
-		"url": "https://github.com/icenveins/worktree"
+		"url": "https://github.com/iceinveins/worktree"
 	},
 	"engines": {
 		"vscode": "^1.85.0"
