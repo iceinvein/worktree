@@ -4,7 +4,7 @@
 	"displayName": "Worktree Manager",
 	"description": "Visual Git worktree management",
 	"icon": "icon.png",
-	"version": "0.0.7",
+	"version": "0.0.8",
 	"repository": {
 		"url": "https://github.com/iceinveins/worktree"
 	},
