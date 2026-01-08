@@ -139,12 +139,28 @@ export class GitService {
 		const isRemote = branch.startsWith("origin/");
 		const localBranch = branch.replace(/^origin\//, "");
 
+		// Check if branch exists
+		let branchExists = false;
+		try {
+			await this.exec(`git rev-parse --verify ${branch}`);
+			branchExists = true;
+		} catch {
+			// branch does not exist
+		}
+
 		if (isRemote) {
+			// Existing remote branch -> local branch
 			await this.exec(
 				`git worktree add -b ${localBranch} "${targetPath}" ${branch}`,
 			);
-		} else {
+		} else if (branchExists) {
+			// Existing local branch
 			await this.exec(`git worktree add "${targetPath}" ${branch}`);
+		} else {
+			// New local branch
+			// "git worktree add -b <new-branch> <path> <base>"
+			// Explicitly base on HEAD to ensure shared history
+			await this.exec(`git worktree add -b ${branch} "${targetPath}" HEAD`);
 		}
 	}
 
@@ -165,7 +181,32 @@ export class GitService {
 		await this.exec("git worktree prune");
 	}
 
-	private async isWorktreeDirty(worktreePath: string): Promise<boolean> {
+	async stash(message: string): Promise<void> {
+		await this.exec(`git stash push -m "${message}"`);
+	}
+
+	async stashPop(cwd: string): Promise<void> {
+		await execAsync("git stash pop", {
+			cwd,
+			encoding: "utf8",
+		});
+	}
+
+	async getMergedBranches(targetBranch: string): Promise<string[]> {
+		try {
+			// Get branches merged into targetBranch
+			const output = await this.exec(`git branch --merged ${targetBranch}`);
+			return output
+				.split("\n")
+				.map((b) => b.trim())
+				.filter((b) => b && !b.startsWith("*") && b !== targetBranch);
+		} catch (e) {
+			console.warn("Failed to get merged branches", e);
+			return [];
+		}
+	}
+
+	public async isWorktreeDirty(worktreePath: string): Promise<boolean> {
 		try {
 			const status = await execAsync("git status --porcelain", {
 				cwd: worktreePath,
@@ -175,6 +216,45 @@ export class GitService {
 		} catch {
 			return false;
 		}
+	}
+
+	async diffStat(target: string): Promise<string> {
+		return this.exec(`git diff --stat HEAD..${target}`);
+	}
+
+	async hasCommits(): Promise<boolean> {
+		try {
+			await this.exec("git log -n 1 --oneline");
+			return true;
+		} catch {
+			return false;
+		}
+	}
+
+	async getHeadCommit(cwd: string): Promise<string> {
+		try {
+			const output = await execAsync("git rev-parse --short HEAD", {
+				cwd,
+				encoding: "utf8",
+			});
+			return output.stdout.trim();
+		} catch (e) {
+			const message = e instanceof Error ? e.message : String(e);
+			throw new Error(`git rev-parse failed in ${cwd}: ${message}`);
+		}
+	}
+
+	async getChangedFiles(target: string): Promise<string[]> {
+		// diff --name-only HEAD..target
+		const output = await this.exec(`git diff --name-only HEAD..${target}`);
+		return output
+			.split("\n")
+			.map((s) => s.trim())
+			.filter(Boolean);
+	}
+
+	getRepoRoot(): string {
+		return this.repoRoot;
 	}
 
 	protected async exec(cmd: string): Promise<string> {
