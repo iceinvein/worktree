@@ -1,52 +1,58 @@
 # Worktree Manager for VS Code
 
-A visual client for managing Git Worktrees directly within VS Code. Keep your main repository clean and check out branches into separate folders (worktrees) to work on multiple tasks simultaneously.
+**Master your Git Worktree workflow without leaving VS Code.**
+
+Worktree Manager gives you a first-class visual interface for Git Worktrees. Check out branches into separate folders, work on multiple features simultaneously, and keep your main repository clean—all with a unified, intuitive UI.
+
+## Why Use Worktrees?
+Stop stashing and popping just to review a PR or fix a bug. Git Worktrees allow you to check out multiple branches at once in separate directories. 
+- 🚀 **Zero context switching overhead**
+- 🛡️ **Clean main environment**
+- ⚡ **Parallel builds and tests**
 
 ## Features
 
-- **Dedicated Explorer View**: "Worktrees" view integrated into the Source Control side panel.
-- **Visual Status**: 
-    - $(check) **Active**: Green checkmark for the current worktree.
-    - $(git-branch) **Modified**: Yellow branch icon for worktrees with uncommitted changes.
-    - $(lock) **Locked**: Lock icon for worktrees protected from pruning.
-- **Rich Details**: Hover over any worktree to see the commit hash, message, author, and relative date.
-- **Worktree Locking**: Lock important worktrees to prevent them from being accidentally pruned (`git worktree prune`).
-- **One-Click Create**: Create a new worktree from any local or remote branch.
-- **Easy Navigation**: Open worktrees in the current window or a new window.
-- **Maintenance**: Prune stale worktrees and remove finished ones with a right-click.
+### ⚡ Quick Switcher
+Jump between your active worktrees instantly.
+- Click the **Status Bar** item to see a list of open worktrees.
+- Use `Cmd/Ctrl+P` behavior with `Worktree Manager: Switch Worktree`.
+
+### 📦 "Bring Changes With Me"
+Started working on `main` but realized update needs a new branch? 
+- Create a new worktree and **automatically move your uncommitted changes** to the new isolated environment.
+- We handle the `stash` and `pop` for you.
+
+### 🎨 Visual & Theme Integration
+- **Color-Coded Windows**: New worktrees get a unique, auto-generated title bar color so you never mix up your "Production Hotfix" window with your "Experimental Feature" window.
+- **Rich Status**: See at a glance which worktrees are dirty, locked, or active.
+
+### 🧹 Smart Cleanup
+Keep your disk usage low. The extension detects worktrees whose branches have been merged into `main` and offers to bulk delete them.
+
+### Other Powerful Tools
+- **Diff View**: Right-click any worktree to see a diff between it and your current reference.
+- **One-Click Create**: Create worktrees from local or remote branches effortlessly.
+- **Lock/Unlock**: Protect critical worktrees from accidental pruning.
 
 ## Usage
 
 1. Open a folder that is part of a Git repository.
-2. Navigate to the **Source Control** view container (usually the Git icon in the sidebar).
-3. You will see two new views:
-    - **Worktrees**: Lists all active worktrees.
-    - **Available Branches**: Lists branches you can create worktrees from.
+2. Open the **Source Control** side panel.
+3. Use the **Worktrees** view to manage your environments.
 
-### Creating a Worktree
-- Hover over a branch in "Available Branches" and click the `+` icon.
-- Or use the command `Worktree Manager: Create Worktree`.
-- You will be prompted for:
-    1. The branch name (if not creating from an existing one).
-    2. The target directory path (defaults to `../{branch_name}`).
+### Commands
+- `Worktree Manager: Create Worktree` - Start a new isolated workspace.
+- `Worktree Manager: Switch Worktree` - Jump to another worktree.
+- `Worktree Manager: Clean Merged Worktrees` - Find and delete finished worktrees.
 
-### Opening a Worktree
-- Click on any worktree in the list.
-- By default, it asks if you want to open in a "New Window" or "Same Window".
-- You can configure this behavior in settings (`worktreeManager.openBehavior`).
+## Configuration
 
-### Locking / Unlocking
-- Right-click on a worktree in the list.
-- Select **Lock Worktree** to protect it. A lock icon will appear.
-- Select **Unlock Worktree** to allow it to be pruned or removed.
+| Setting | Default | Description |
+| :--- | :--- | :--- |
+| `worktreeManager.defaultPath` | `../{branch}` | Where to create new worktrees relative to the repo. |
+| `worktreeManager.openBehavior` | `ask` | `newWindow`, `sameWindow`, or `ask` when opening a worktree. |
+| `worktreeManager.showRemoteBranches` | `true` | Show/hide remote branches in the creation list. |
 
-## Extension Settings
+---
 
-This extension contributes the following settings:
-
-* `worktreeManager.defaultPath`: Pattern for new worktree paths (default: `../{branch}`). Variables: `{branch}`, `{repo}`.
-* `worktreeManager.openBehavior`: `ask` (default), `newWindow`, or `sameWindow`.
-* `worktreeManager.showRemoteBranches`: Toggle whether to show remote branches in the list.
-
-## KNOWN ISSUES
-- None currently.
+**Enjoying Worktree Manager?** leave a rating! ⭐️
