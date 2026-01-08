@@ -45,29 +45,43 @@ export class WorktreeItem extends vscode.TreeItem {
 
 		this.tooltip = tooltip;
 
+		// Icon logic: Current > Locked > Default
 		if (worktree.isCurrent) {
 			this.iconPath = new vscode.ThemeIcon(
 				"check",
 				new vscode.ThemeColor("testing.iconPassed"),
 			);
 			this.contextValue = "worktreeCurrent";
+		} else if (worktree.isLocked) {
+			this.iconPath = new vscode.ThemeIcon("lock");
+			this.contextValue = "worktreeLocked";
 		} else {
 			this.iconPath = new vscode.ThemeIcon("git-branch");
 			this.contextValue = "worktree";
 		}
 
-		if (worktree.isLocked) {
-			this.iconPath = new vscode.ThemeIcon("lock");
-			this.contextValue += "Locked";
+		// Update context value for combinations
+		if (worktree.isCurrent && worktree.isLocked) {
+			this.contextValue = "worktreeCurrentLocked";
 		}
 
-		// Add decoration for dirty state
+		// Text indicators
+		if (worktree.isLocked) {
+			this.description += " 🔒";
+		}
+
 		if (worktree.isDirty) {
-			this.description += " (Modified)";
-			this.iconPath = new vscode.ThemeIcon(
-				"git-branch",
-				new vscode.ThemeColor("charts.yellow"),
-			);
+			this.description += " • Modified";
+			// If not current/locked, show yellow branch?
+			// Prioritize Locked icon over Dirty color if not current.
+			// Ideally we want both. But TreeItem only has one icon.
+			// Let's stick to the color if it's just a normal branch.
+			if (!worktree.isCurrent && !worktree.isLocked) {
+				this.iconPath = new vscode.ThemeIcon(
+					"git-branch",
+					new vscode.ThemeColor("charts.yellow"),
+				);
+			}
 		}
 
 		this.command = {
