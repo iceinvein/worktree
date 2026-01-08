@@ -1,12 +1,17 @@
 import * as vscode from "vscode";
 import { BranchProvider } from "./branchProvider";
+import { checkMergedWorktrees } from "./commands/cleanup";
 import { createWorktree } from "./commands/create";
+import { diffWorktree } from "./commands/diff";
 import { lockWorktree, unlockWorktree } from "./commands/lock";
 import { openWorktree } from "./commands/open";
 import { pruneWorktrees } from "./commands/prune";
 import { removeWorktree } from "./commands/remove";
+import { switchWorktree } from "./commands/switch";
 import { GitService } from "./gitService";
+import { StatusManager } from "./statusBar";
 import { type WorktreeItem, WorktreeProvider } from "./worktreeProvider";
+import { EmptyDocumentProvider } from "./utils/emptyProvider";
 
 export function activate(context: vscode.ExtensionContext) {
 	const workspaceRoot = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
@@ -18,6 +23,9 @@ export function activate(context: vscode.ExtensionContext) {
 	const git = new GitService(workspaceRoot);
 	const worktreeProvider = new WorktreeProvider(git);
 	const branchProvider = new BranchProvider(git);
+	const statusManager = new StatusManager(git);
+
+	context.subscriptions.push(statusManager);
 
 	// Register tree views
 	vscode.window.registerTreeDataProvider(
@@ -37,7 +45,16 @@ export function activate(context: vscode.ExtensionContext) {
 
 	// Register commands
 	context.subscriptions.push(
+		vscode.workspace.registerTextDocumentContentProvider(
+			"worktree-empty",
+			new EmptyDocumentProvider(),
+		),
+
 		vscode.commands.registerCommand("worktreeManager.refresh", refreshAll),
+
+		vscode.commands.registerCommand("worktreeManager.switch", () =>
+			switchWorktree(git),
+		),
 
 		vscode.commands.registerCommand(
 			"worktreeManager.create",
@@ -62,6 +79,10 @@ export function activate(context: vscode.ExtensionContext) {
 		),
 
 		vscode.commands.registerCommand("worktreeManager.open", openWorktree),
+
+		vscode.commands.registerCommand("worktreeManager.diff", async (item) => {
+			await diffWorktree(git, item);
+		}),
 
 		vscode.commands.registerCommand(
 			"worktreeManager.openNewWindow",
@@ -90,6 +111,11 @@ export function activate(context: vscode.ExtensionContext) {
 
 		vscode.commands.registerCommand("worktreeManager.prune", async () => {
 			await pruneWorktrees(git);
+			refreshAll();
+		}),
+
+		vscode.commands.registerCommand("worktreeManager.checkMerged", async () => {
+			await checkMergedWorktrees(git);
 			refreshAll();
 		}),
 	);

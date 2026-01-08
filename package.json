@@ -81,6 +81,10 @@
 				"icon": "$(refresh)"
 			},
 			{
+				"command": "worktreeManager.switch",
+				"title": "Switch Worktree"
+			},
+			{
 				"command": "worktreeManager.create",
 				"title": "Create Worktree",
 				"icon": "$(add)"
@@ -94,12 +98,22 @@
 				"title": "Open in New Window"
 			},
 			{
+				"command": "worktreeManager.diff",
+				"title": "Diff with HEAD",
+				"icon": "$(diff)"
+			},
+			{
 				"command": "worktreeManager.remove",
 				"title": "Remove Worktree"
 			},
 			{
 				"command": "worktreeManager.prune",
 				"title": "Prune Stale Worktrees"
+			},
+			{
+				"command": "worktreeManager.checkMerged",
+				"title": "Clean Merged Worktrees",
+				"icon": "$(trash)"
 			},
 			{
 				"command": "worktreeManager.lock",
@@ -129,6 +143,11 @@
 				{
 					"command": "worktreeManager.open",
 					"when": "viewItem =~ /worktree/"
+				},
+				{
+					"command": "worktreeManager.diff",
+					"when": "viewItem =~ /worktree/",
+					"group": "inline"
 				},
 				{
 					"command": "worktreeManager.openNewWindow",
