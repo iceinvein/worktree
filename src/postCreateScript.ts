@@ -14,6 +14,9 @@ export interface ScriptResult {
 
 const DEFAULT_SCRIPT_NAME = ".worktree-setup.sh";
 
+const accessMode =
+	process.platform === "win32" ? fs.constants.R_OK : fs.constants.X_OK;
+
 export async function findScript(
 	repoRoot: string,
 	configuredPath: string,
@@ -21,8 +24,12 @@ export async function findScript(
 	// 1. Check configured path first
 	if (configuredPath) {
 		const resolved = path.resolve(repoRoot, configuredPath);
+		// Prevent path traversal outside repo root
+		if (!resolved.startsWith(repoRoot + path.sep) && resolved !== repoRoot) {
+			return undefined;
+		}
 		try {
-			await fs.access(resolved, fs.constants.X_OK);
+			await fs.access(resolved, accessMode);
 			return resolved;
 		} catch {
 			return undefined;
@@ -32,7 +39,7 @@ export async function findScript(
 	// 2. Fall back to convention
 	const defaultPath = path.join(repoRoot, DEFAULT_SCRIPT_NAME);
 	try {
-		await fs.access(defaultPath, fs.constants.X_OK);
+		await fs.access(defaultPath, accessMode);
 		return defaultPath;
 	} catch {
 		return undefined;

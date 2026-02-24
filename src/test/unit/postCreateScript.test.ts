@@ -49,6 +49,11 @@ describe("postCreateScript", () => {
 			const result = await findScript(tmpDir, "nonexistent.sh");
 			assert.strictEqual(result, undefined);
 		});
+
+		it("rejects path traversal outside repo root", async () => {
+			const result = await findScript(tmpDir, "../../etc/passwd");
+			assert.strictEqual(result, undefined);
+		});
 	});
 
 	describe("runPostCreateScript", () => {
