@@ -59,6 +59,11 @@
 					"type": "boolean",
 					"default": true,
 					"description": "Show remote branches in available branches list"
+				},
+				"worktreeManager.postCreateScript": {
+					"type": "string",
+					"default": "",
+					"description": "Path to a script (relative to repo root) to run after creating a worktree. Falls back to .worktree-setup.sh if not set."
 				}
 			}
 		},
