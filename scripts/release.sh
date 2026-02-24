@@ -14,6 +14,16 @@ if [[ -n $(git status --porcelain) ]]; then
 	exit 1
 fi
 
+if ! command -v gh &>/dev/null; then
+	echo "Error: gh CLI is required (https://cli.github.com)" >&2
+	exit 1
+fi
+
+if ! gh auth status &>/dev/null; then
+	echo "Error: gh CLI is not authenticated. Run 'gh auth login'" >&2
+	exit 1
+fi
+
 echo "Running tests..."
 if ! npm test --silent 2>/dev/null; then
 	echo "Error: tests failed" >&2
@@ -33,11 +43,11 @@ if [[ -z "$BUMP" ]]; then
 		COMMITS=$(git log --format="%s")
 	fi
 
-	if echo "$COMMITS" | grep -q "BREAKING CHANGE"; then
+	if grep -q "BREAKING CHANGE" <<< "$COMMITS"; then
 		BUMP="major"
-	elif echo "$COMMITS" | grep -q "^feat:"; then
+	elif grep -qE "^feat(\(.+\))?:" <<< "$COMMITS"; then
 		BUMP="minor"
-	elif echo "$COMMITS" | grep -qE "^(fix|perf):"; then
+	elif grep -qE "^(fix|perf)(\(.+\))?:" <<< "$COMMITS"; then
 		BUMP="patch"
 	else
 		BUMP="patch"
@@ -77,9 +87,9 @@ node -e "
 const fs = require('fs');
 const raw = fs.readFileSync('package.json', 'utf8');
 const pkg = JSON.parse(raw);
-pkg.version = '$NEW_VERSION';
+pkg.version = process.argv[1];
 fs.writeFileSync('package.json', JSON.stringify(pkg, null, '\t') + '\n');
-"
+" "$NEW_VERSION"
 
 # ─── Generate/update CHANGELOG.md ────────────────────────────────────────────
 
@@ -89,6 +99,11 @@ if [[ -n "$LAST_TAG" ]]; then
 	LOG=$(git log "$LAST_TAG"..HEAD --format="%h %s")
 else
 	LOG=$(git log --format="%h %s")
+fi
+
+if [[ -z "$LOG" ]]; then
+	echo "Error: no commits since last release ($LAST_TAG). Nothing to release." >&2
+	exit 1
 fi
 
 FEATURES=""
@@ -101,12 +116,12 @@ while IFS= read -r line; do
 	HASH="${line%% *}"
 	MSG="${line#* }"
 
-	if [[ "$MSG" =~ ^feat:\ (.+) ]]; then
-		FEATURES+="- ${BASH_REMATCH[1]} ($HASH)"$'\n'
-	elif [[ "$MSG" =~ ^(fix|perf):\ (.+) ]]; then
-		FIXES+="- ${BASH_REMATCH[2]} ($HASH)"$'\n'
+	if [[ "$MSG" =~ ^feat(\(.+\))?:\ (.+) ]]; then
+		FEATURES+=$'\n'"- ${BASH_REMATCH[2]} ($HASH)"
+	elif [[ "$MSG" =~ ^(fix|perf)(\(.+\))?:\ (.+) ]]; then
+		FIXES+=$'\n'"- ${BASH_REMATCH[3]} ($HASH)"
 	else
-		OTHER+="- ${MSG} ($HASH)"$'\n'
+		OTHER+=$'\n'"- ${MSG} ($HASH)"
 	fi
 done <<< "$LOG"
 
