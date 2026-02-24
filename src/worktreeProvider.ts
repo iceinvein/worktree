@@ -1,5 +1,9 @@
 import * as vscode from "vscode";
 import type { GitService, Worktree } from "./gitService";
+import {
+	buildWorktreeTooltipMarkdown,
+	resolveWorktreeItemState,
+} from "./utils/worktreeHelpers";
 
 export class WorktreeProvider implements vscode.TreeDataProvider<WorktreeItem> {
 	private _onDidChange = new vscode.EventEmitter<void>();
@@ -25,64 +29,19 @@ export class WorktreeItem extends vscode.TreeItem {
 	constructor(public readonly worktree: Worktree) {
 		super(worktree.branch, vscode.TreeItemCollapsibleState.None);
 
-		this.description = worktree.path;
+		const state = resolveWorktreeItemState(worktree);
 
-		const tooltip = new vscode.MarkdownString(`**${worktree.branch}**\n\n`);
-		tooltip.appendMarkdown(`$(folder) ${worktree.path}\n\n`);
-		tooltip.appendMarkdown(`$(git-commit) ${worktree.commit}`);
-		if (worktree.commitMessage)
-			tooltip.appendMarkdown(`: ${worktree.commitMessage}`);
-		if (worktree.commitAuthor)
-			tooltip.appendMarkdown(`\n\nby **${worktree.commitAuthor}**`);
-		if (worktree.commitDate)
-			tooltip.appendMarkdown(` (${worktree.commitDate})`);
-
-		if (worktree.isLocked) {
-			tooltip.appendMarkdown(`\n\n$(lock) **Locked**`);
-			if (worktree.lockReason)
-				tooltip.appendMarkdown(`: ${worktree.lockReason}`);
-		}
-
-		this.tooltip = tooltip;
-
-		// Icon logic: Current > Locked > Default
-		if (worktree.isCurrent) {
-			this.iconPath = new vscode.ThemeIcon(
-				"check",
-				new vscode.ThemeColor("testing.iconPassed"),
-			);
-			this.contextValue = "worktreeCurrent";
-		} else if (worktree.isLocked) {
-			this.iconPath = new vscode.ThemeIcon("lock");
-			this.contextValue = "worktreeLocked";
-		} else {
-			this.iconPath = new vscode.ThemeIcon("git-branch");
-			this.contextValue = "worktree";
-		}
-
-		// Update context value for combinations
-		if (worktree.isCurrent && worktree.isLocked) {
-			this.contextValue = "worktreeCurrentLocked";
-		}
-
-		// Text indicators
-		if (worktree.isLocked) {
-			this.description += " 🔒";
-		}
-
-		if (worktree.isDirty) {
-			this.description += " • Modified";
-			// If not current/locked, show yellow branch?
-			// Prioritize Locked icon over Dirty color if not current.
-			// Ideally we want both. But TreeItem only has one icon.
-			// Let's stick to the color if it's just a normal branch.
-			if (!worktree.isCurrent && !worktree.isLocked) {
-				this.iconPath = new vscode.ThemeIcon(
-					"git-branch",
-					new vscode.ThemeColor("charts.yellow"),
-				);
-			}
-		}
+		this.contextValue = state.contextValue;
+		this.iconPath = state.iconColorId
+			? new vscode.ThemeIcon(
+					state.iconId,
+					new vscode.ThemeColor(state.iconColorId),
+				)
+			: new vscode.ThemeIcon(state.iconId);
+		this.description = worktree.path + state.descriptionSuffix;
+		this.tooltip = new vscode.MarkdownString(
+			buildWorktreeTooltipMarkdown(worktree),
+		);
 
 		this.command = {
 			command: "worktreeManager.open",

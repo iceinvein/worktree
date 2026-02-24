@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { type GitService } from "./gitService";
+import type { GitService } from "./gitService";
 
 export class StatusManager {
 	private statusBarItem: vscode.StatusBarItem;

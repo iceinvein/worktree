@@ -10,8 +10,8 @@ import { removeWorktree } from "./commands/remove";
 import { switchWorktree } from "./commands/switch";
 import { GitService } from "./gitService";
 import { StatusManager } from "./statusBar";
-import { type WorktreeItem, WorktreeProvider } from "./worktreeProvider";
 import { EmptyDocumentProvider } from "./utils/emptyProvider";
+import { type WorktreeItem, WorktreeProvider } from "./worktreeProvider";
 
 export function activate(context: vscode.ExtensionContext) {
 	const workspaceRoot = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;

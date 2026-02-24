@@ -1,9 +1,9 @@
-import * as path from "node:path";
 import * as vscode from "vscode";
 import type { BranchItem } from "../branchProvider";
 import type { GitService } from "../gitService";
 import { findScript, runPostCreateScript } from "../postCreateScript";
 import { applyThemeColor } from "../utils/theme";
+import { resolveWorktreePath } from "../utils/worktreeHelpers";
 
 export async function createWorktree(
 	git: GitService,
@@ -27,13 +27,7 @@ export async function createWorktree(
 	const config = vscode.workspace.getConfiguration("worktreeManager");
 	const pattern = config.get<string>("defaultPath", "../{branch}");
 
-	const repoName = path.basename(repoRoot);
-	const safeBranch = branch.replace(/^origin\//, "").replace(/\//g, "-");
-	const defaultPath = pattern
-		.replace("{branch}", safeBranch)
-		.replace("{repo}", repoName);
-
-	const resolvedDefault = path.resolve(repoRoot, defaultPath);
+	const resolvedDefault = resolveWorktreePath(branch, repoRoot, pattern);
 
 	// 3. Prompt for path (prefilled with default)
 	const targetPath = await vscode.window.showInputBox({

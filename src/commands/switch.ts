@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { type GitService } from "../gitService";
+import type { GitService } from "../gitService";
 import { openWorktree } from "./open";
 
 export async function switchWorktree(git: GitService) {
