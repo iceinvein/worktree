@@ -129,13 +129,13 @@ SECTION=""
 SECTION+="## [${NEW_VERSION}] - ${TODAY}"$'\n'
 
 if [[ -n "$FEATURES" ]]; then
-	SECTION+=$'\n'"### Features"$'\n\n'"${FEATURES}"
+	SECTION+=$'\n'"### Features"$'\n'"${FEATURES}"
 fi
 if [[ -n "$FIXES" ]]; then
-	SECTION+=$'\n'"### Fixes"$'\n\n'"${FIXES}"
+	SECTION+=$'\n'"### Fixes"$'\n'"${FIXES}"
 fi
 if [[ -n "$OTHER" ]]; then
-	SECTION+=$'\n'"### Other"$'\n\n'"${OTHER}"
+	SECTION+=$'\n'"### Other"$'\n'"${OTHER}"
 fi
 
 if [[ -f "CHANGELOG.md" ]]; then
