@@ -2,6 +2,7 @@ import * as path from "node:path";
 import * as vscode from "vscode";
 import type { BranchItem } from "../branchProvider";
 import type { GitService } from "../gitService";
+import { findScript, runPostCreateScript } from "../postCreateScript";
 import { applyThemeColor } from "../utils/theme";
 
 export async function createWorktree(
@@ -72,6 +73,23 @@ export async function createWorktree(
 
 		// NEW: Apply theme
 		await applyThemeColor(targetPath, branch);
+
+		// Run post-create script if configured
+		const postCreateSetting = config.get<string>("postCreateScript", "");
+		const scriptPath = await findScript(repoRoot, postCreateSetting);
+		if (scriptPath) {
+			const result = await runPostCreateScript(
+				scriptPath,
+				repoRoot,
+				targetPath,
+				branch,
+			);
+			if (!result.success) {
+				vscode.window.showWarningMessage(
+					`Post-create script failed: ${result.error}`,
+				);
+			}
+		}
 
 		if (stashAndPop) {
 			try {
