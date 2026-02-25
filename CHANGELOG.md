@@ -1,5 +1,24 @@
 # Changelog
 
+## [0.3.0] - 2026-02-25
+
+### Features
+
+- add bulk remove, lock, and update operations (b60802f)
+- add session snapshot/restore for worktree switching (ff9be88)
+- add environment cloning via .worktree-env.json on worktree create (587adcd)
+- add update-from-main command with rebase/merge strategy (1c1e2eb)
+- add smart cleanup wizard with merged/stale/behind categorization (b1c5785)
+- display ahead/behind, staleness, change count, disk size in worktree views (802e5bc)
+- add formatAheadBehind, isStale, formatDiskSize helpers (ac1f599)
+- enrich getWorktrees with ahead/behind, changedFilesCount, diskSize, lastActivityDate (5adc93e)
+- add getAheadBehind, getChangedFilesCount, getLastCommitDate, getDiskSize to GitService (799847a)
+- add baseBranch, staleDaysThreshold, envCloneConfig settings (fe5ac5c)
+### Other
+
+- docs: update README with smart worktree lifecycle features (a6a9cd3)
+- chore: fix lint warnings in new and existing files (63bb69b)
+
 ## [0.2.0] - 2026-02-25
 
 ### Features
