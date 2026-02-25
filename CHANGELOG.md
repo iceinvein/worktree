@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.2.0] - 2026-02-25
+
+### Features
+
+- auto-refresh worktree and branch views (a99138b)
+### Other
+
+- docs: rewrite README with complete feature and config coverage (aa3cdd4)
+
 ## [0.1.0] - 2026-02-24
 
 ### Features
