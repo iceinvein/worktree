@@ -14,6 +14,12 @@ export interface Worktree {
 	commitMessage?: string;
 	commitAuthor?: string;
 	commitDate?: string;
+	// Dashboard enrichment fields
+	ahead?: number;
+	behind?: number;
+	changedFilesCount?: number;
+	diskSizeBytes?: number;
+	lastActivityDate?: Date | null;
 }
 
 export interface Branch {
@@ -251,6 +257,54 @@ export class GitService {
 			.split("\n")
 			.map((s) => s.trim())
 			.filter(Boolean);
+	}
+
+	async getAheadBehind(
+		worktreePath: string,
+		baseBranch: string,
+	): Promise<{ ahead: number; behind: number }> {
+		try {
+			const output = await this.exec(
+				`git -C "${worktreePath}" rev-list --left-right --count ${baseBranch}...HEAD`,
+			);
+			const [behind, ahead] = output.trim().split("\t").map(Number);
+			return { ahead: ahead || 0, behind: behind || 0 };
+		} catch {
+			return { ahead: 0, behind: 0 };
+		}
+	}
+
+	async getChangedFilesCount(worktreePath: string): Promise<number> {
+		try {
+			const output = await this.exec(
+				`git -C "${worktreePath}" status --porcelain`,
+			);
+			const lines = output.trim().split("\n").filter(Boolean);
+			return lines.length;
+		} catch {
+			return 0;
+		}
+	}
+
+	async getLastCommitDate(worktreePath: string): Promise<Date | null> {
+		try {
+			const output = await this.exec(
+				`git -C "${worktreePath}" log -1 --format=%cI`,
+			);
+			return new Date(output.trim());
+		} catch {
+			return null;
+		}
+	}
+
+	async getDiskSize(worktreePath: string): Promise<number> {
+		try {
+			const output = await this.exec(`du -sk "${worktreePath}"`);
+			const kb = Number.parseInt(output.trim().split("\t")[0], 10);
+			return kb * 1024;
+		} catch {
+			return 0;
+		}
 	}
 
 	getRepoRoot(): string {

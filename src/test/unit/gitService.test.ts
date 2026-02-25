@@ -363,4 +363,79 @@ locked reason is testing
 			assert.strictEqual(git.getRepoRoot(), "/mock/root");
 		});
 	});
+
+	describe("getAheadBehind", () => {
+		it("parses ahead/behind counts", async () => {
+			git.mockOutputs["rev-list --left-right --count"] = "3\t5\n";
+
+			const result = await git.getAheadBehind("/mock/feature", "main");
+
+			assert.strictEqual(result.ahead, 5);
+			assert.strictEqual(result.behind, 3);
+		});
+
+		it("returns zeros on error", async () => {
+			git.mockErrors["rev-list --left-right --count"] = new Error("bad ref");
+
+			const result = await git.getAheadBehind("/mock/feature", "main");
+
+			assert.strictEqual(result.ahead, 0);
+			assert.strictEqual(result.behind, 0);
+		});
+	});
+
+	describe("getChangedFilesCount", () => {
+		it("returns count of changed files", async () => {
+			git.mockOutputs["status --porcelain"] = " M src/a.ts\n M src/b.ts\n?? new.ts\n";
+
+			const count = await git.getChangedFilesCount("/mock/feature");
+
+			assert.strictEqual(count, 3);
+		});
+
+		it("returns 0 for clean worktree", async () => {
+			git.mockOutputs["status --porcelain"] = "";
+
+			const count = await git.getChangedFilesCount("/mock/feature");
+
+			assert.strictEqual(count, 0);
+		});
+	});
+
+	describe("getLastCommitDate", () => {
+		it("parses commit date", async () => {
+			git.mockOutputs["log -1 --format=%cI"] = "2026-02-20T10:30:00+00:00\n";
+
+			const date = await git.getLastCommitDate("/mock/feature");
+
+			assert.ok(date instanceof Date);
+			assert.strictEqual(date.toISOString(), "2026-02-20T10:30:00.000Z");
+		});
+
+		it("returns null on error", async () => {
+			git.mockErrors["log -1 --format=%cI"] = new Error("no commits");
+
+			const date = await git.getLastCommitDate("/mock/feature");
+
+			assert.strictEqual(date, null);
+		});
+	});
+
+	describe("getDiskSize", () => {
+		it("parses du output in kilobytes", async () => {
+			git.mockOutputs["du -sk"] = "51200\t/mock/feature\n";
+
+			const bytes = await git.getDiskSize("/mock/feature");
+
+			assert.strictEqual(bytes, 51200 * 1024);
+		});
+
+		it("returns 0 on error", async () => {
+			git.mockErrors["du -sk"] = new Error("no such dir");
+
+			const bytes = await git.getDiskSize("/mock/feature");
+
+			assert.strictEqual(bytes, 0);
+		});
+	});
 });
