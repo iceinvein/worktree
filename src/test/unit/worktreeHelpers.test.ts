@@ -3,6 +3,9 @@ import * as path from "node:path";
 import type { Worktree } from "../../gitService";
 import {
 	buildWorktreeTooltipMarkdown,
+	formatAheadBehind,
+	formatDiskSize,
+	isStale,
 	resolveWorktreeItemState,
 	resolveWorktreePath,
 } from "../../utils/worktreeHelpers";
@@ -237,5 +240,59 @@ describe("resolveWorktreePath", () => {
 		);
 
 		assert.strictEqual(result, "/tmp/worktrees/develop");
+	});
+});
+
+describe("formatAheadBehind", () => {
+	it("returns formatted string for both ahead and behind", () => {
+		assert.strictEqual(formatAheadBehind(3, 2), "↑3 ↓2");
+	});
+
+	it("returns only ahead when behind is 0", () => {
+		assert.strictEqual(formatAheadBehind(3, 0), "↑3");
+	});
+
+	it("returns only behind when ahead is 0", () => {
+		assert.strictEqual(formatAheadBehind(0, 2), "↓2");
+	});
+
+	it("returns empty string when both are 0", () => {
+		assert.strictEqual(formatAheadBehind(0, 0), "");
+	});
+});
+
+describe("isStale", () => {
+	it("returns true when last activity exceeds threshold", () => {
+		const old = new Date();
+		old.setDate(old.getDate() - 20);
+		assert.strictEqual(isStale(old, 14), true);
+	});
+
+	it("returns false when last activity is within threshold", () => {
+		const recent = new Date();
+		recent.setDate(recent.getDate() - 3);
+		assert.strictEqual(isStale(recent, 14), false);
+	});
+
+	it("returns false for null date", () => {
+		assert.strictEqual(isStale(null, 14), false);
+	});
+});
+
+describe("formatDiskSize", () => {
+	it("formats bytes as KB", () => {
+		assert.strictEqual(formatDiskSize(512), "0.5 KB");
+	});
+
+	it("formats as MB for larger sizes", () => {
+		assert.strictEqual(formatDiskSize(5 * 1024 * 1024), "5.0 MB");
+	});
+
+	it("formats as GB for very large sizes", () => {
+		assert.strictEqual(formatDiskSize(2.5 * 1024 * 1024 * 1024), "2.5 GB");
+	});
+
+	it("returns 0 KB for 0 bytes", () => {
+		assert.strictEqual(formatDiskSize(0), "0 KB");
 	});
 });

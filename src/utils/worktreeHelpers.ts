@@ -96,3 +96,41 @@ export function resolveWorktreePath(
 		.replace("{repo}", repoName);
 	return path.resolve(repoRoot, expanded);
 }
+
+/**
+ * Formats ahead/behind counts into a compact display string.
+ * Returns "" if both are 0.
+ */
+export function formatAheadBehind(ahead: number, behind: number): string {
+	const parts: string[] = [];
+	if (ahead > 0) parts.push(`↑${ahead}`);
+	if (behind > 0) parts.push(`↓${behind}`);
+	return parts.join(" ");
+}
+
+/**
+ * Returns true if the given date is older than `thresholdDays` days ago.
+ */
+export function isStale(
+	date: Date | null | undefined,
+	thresholdDays: number,
+): boolean {
+	if (!date) return false;
+	const now = new Date();
+	const diffMs = now.getTime() - date.getTime();
+	const diffDays = diffMs / (1000 * 60 * 60 * 24);
+	return diffDays > thresholdDays;
+}
+
+/**
+ * Formats byte count into human-readable size string.
+ */
+export function formatDiskSize(bytes: number): string {
+	if (bytes === 0) return "0 KB";
+	const kb = bytes / 1024;
+	if (kb < 1024) return `${kb.toFixed(1)} KB`;
+	const mb = kb / 1024;
+	if (mb < 1024) return `${mb.toFixed(1)} MB`;
+	const gb = mb / 1024;
+	return `${gb.toFixed(1)} GB`;
+}
