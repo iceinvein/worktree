@@ -152,6 +152,11 @@
 				"command": "worktreeManager.unlock",
 				"title": "Unlock Worktree",
 				"icon": "$(unlock)"
+			},
+			{
+				"command": "worktreeManager.smartCleanup",
+				"title": "Smart Cleanup",
+				"icon": "$(sparkle)"
 			}
 		],
 		"menus": {
@@ -163,6 +168,11 @@
 				},
 				{
 					"command": "worktreeManager.create",
+					"when": "view == worktreeManager.worktrees",
+					"group": "navigation"
+				},
+				{
+					"command": "worktreeManager.smartCleanup",
 					"when": "view == worktreeManager.worktrees",
 					"group": "navigation"
 				}

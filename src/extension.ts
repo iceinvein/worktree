@@ -8,6 +8,7 @@ import { lockWorktree, unlockWorktree } from "./commands/lock";
 import { openWorktree } from "./commands/open";
 import { pruneWorktrees } from "./commands/prune";
 import { removeWorktree } from "./commands/remove";
+import { smartCleanup } from "./commands/smartCleanup";
 import { switchWorktree } from "./commands/switch";
 import { GitService } from "./gitService";
 import { StatusManager } from "./statusBar";
@@ -123,6 +124,14 @@ export function activate(context: vscode.ExtensionContext) {
 			await checkMergedWorktrees(git);
 			refreshAll();
 		}),
+
+		vscode.commands.registerCommand(
+			"worktreeManager.smartCleanup",
+			async () => {
+				await smartCleanup(git);
+				refreshAll();
+			},
+		),
 	);
 }
 
