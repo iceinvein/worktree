@@ -1,5 +1,6 @@
 import * as vscode from "vscode";
 import type { BranchItem } from "../branchProvider";
+import { cloneEnvironment, loadEnvCloneConfig } from "../envCloner";
 import type { GitService } from "../gitService";
 import { findScript, runPostCreateScript } from "../postCreateScript";
 import { applyThemeColor } from "../utils/theme";
@@ -67,6 +68,16 @@ export async function createWorktree(
 
 		// NEW: Apply theme
 		await applyThemeColor(targetPath, branch);
+
+		// Clone environment files if configured
+		const envConfigName = config.get<string>(
+			"envCloneConfig",
+			".worktree-env.json",
+		);
+		const envConfig = await loadEnvCloneConfig(repoRoot, envConfigName);
+		if (envConfig) {
+			await cloneEnvironment(repoRoot, targetPath, envConfig);
+		}
 
 		// Run post-create script if configured
 		const postCreateSetting = config.get<string>("postCreateScript", "");
