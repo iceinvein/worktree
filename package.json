@@ -71,6 +71,22 @@
 					"default": 30,
 					"minimum": 0,
 					"description": "Polling interval in seconds for auto-refreshing worktree and branch views. Set to 0 to disable polling (filesystem watcher and focus listener remain active)."
+				},
+				"worktreeManager.baseBranch": {
+					"type": "string",
+					"default": "main",
+					"description": "Base branch used for ahead/behind counts and rebase operations"
+				},
+				"worktreeManager.staleDaysThreshold": {
+					"type": "number",
+					"default": 14,
+					"minimum": 1,
+					"description": "Number of days with no commits before a worktree is considered stale"
+				},
+				"worktreeManager.envCloneConfig": {
+					"type": "string",
+					"default": ".worktree-env.json",
+					"description": "Path to environment cloning config file (relative to repo root)"
 				}
 			}
 		},
