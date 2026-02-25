@@ -162,6 +162,18 @@
 				"command": "worktreeManager.updateFromMain",
 				"title": "Update from Main",
 				"icon": "$(cloud-download)"
+			},
+			{
+				"command": "worktreeManager.bulkRemove",
+				"title": "Remove Selected Worktrees"
+			},
+			{
+				"command": "worktreeManager.bulkLock",
+				"title": "Lock Selected Worktrees"
+			},
+			{
+				"command": "worktreeManager.bulkUpdate",
+				"title": "Update Selected from Main"
 			}
 		],
 		"menus": {

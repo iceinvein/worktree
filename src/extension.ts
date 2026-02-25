@@ -1,6 +1,7 @@
 import * as vscode from "vscode";
 import { AutoRefreshManager } from "./autoRefresh";
 import { BranchProvider } from "./branchProvider";
+import { bulkLock, bulkRemove, bulkUpdate } from "./commands/bulkOps";
 import { checkMergedWorktrees } from "./commands/cleanup";
 import { createWorktree } from "./commands/create";
 import { diffWorktree } from "./commands/diff";
@@ -144,6 +145,33 @@ export function activate(context: vscode.ExtensionContext) {
 			"worktreeManager.updateFromMain",
 			async (item) => {
 				await updateFromMain(git, item);
+				refreshAll();
+			},
+		),
+
+		vscode.commands.registerCommand(
+			"worktreeManager.bulkRemove",
+			async (...args: unknown[]) => {
+				const items = args.flat() as WorktreeItem[];
+				await bulkRemove(git, items);
+				refreshAll();
+			},
+		),
+
+		vscode.commands.registerCommand(
+			"worktreeManager.bulkLock",
+			async (...args: unknown[]) => {
+				const items = args.flat() as WorktreeItem[];
+				await bulkLock(git, items);
+				refreshAll();
+			},
+		),
+
+		vscode.commands.registerCommand(
+			"worktreeManager.bulkUpdate",
+			async (...args: unknown[]) => {
+				const items = args.flat() as WorktreeItem[];
+				await bulkUpdate(git, items);
 				refreshAll();
 			},
 		),
