@@ -12,6 +12,12 @@ import { smartCleanup } from "./commands/smartCleanup";
 import { switchWorktree } from "./commands/switch";
 import { updateFromMain } from "./commands/updateFromMain";
 import { GitService } from "./gitService";
+import {
+	captureCurrentSession,
+	loadSession,
+	restoreSession,
+	saveSessionToFile,
+} from "./sessionManager";
 import { StatusManager } from "./statusBar";
 import { EmptyDocumentProvider } from "./utils/emptyProvider";
 import { type WorktreeItem, WorktreeProvider } from "./worktreeProvider";
@@ -142,6 +148,34 @@ export function activate(context: vscode.ExtensionContext) {
 			},
 		),
 	);
+
+	// Check for session to restore
+	(async () => {
+		const session = await loadSession(workspaceRoot);
+		if (session) {
+			const age = Date.now() - new Date(session.timestamp).getTime();
+			const ageStr =
+				age < 3600000
+					? `${Math.floor(age / 60000)}m ago`
+					: `${Math.floor(age / 3600000)}h ago`;
+			const choice = await vscode.window.showInformationMessage(
+				`Restore previous session? (${session.editors.length} files from ${ageStr})`,
+				"Restore",
+				"Open Fresh",
+			);
+			if (choice === "Restore") {
+				await restoreSession(workspaceRoot, session);
+			}
+		}
+	})();
 }
 
-export function deactivate() {}
+export function deactivate() {
+	const workspaceRoot = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
+	if (workspaceRoot) {
+		const session = captureCurrentSession(workspaceRoot);
+		if (session) {
+			saveSessionToFile(workspaceRoot, session).catch(() => {});
+		}
+	}
+}

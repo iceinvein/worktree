@@ -1,4 +1,5 @@
 import * as vscode from "vscode";
+import { captureCurrentSession, saveSessionToFile } from "../sessionManager";
 import type { WorktreeItem } from "../worktreeProvider";
 
 export type OpenBehavior = "newWindow" | "sameWindow" | "ask";
@@ -21,6 +22,15 @@ export async function openWorktree(item: WorktreeItem): Promise<void> {
 		openInNew = choice.value;
 	} else {
 		openInNew = behavior === "newWindow";
+	}
+
+	// Save current session before switching (same window only)
+	const currentRoot = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
+	if (currentRoot && !openInNew) {
+		const session = captureCurrentSession(currentRoot);
+		if (session) {
+			await saveSessionToFile(currentRoot, session);
+		}
 	}
 
 	const uri = vscode.Uri.file(item.worktree.path);
