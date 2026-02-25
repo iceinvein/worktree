@@ -197,6 +197,28 @@ locked reason is testing
 			assert.strictEqual(worktrees[0].commitAuthor, "Alice");
 			assert.strictEqual(worktrees[0].commitDate, "3 days ago");
 		});
+
+		it("populates enrichment fields (ahead/behind, changedFilesCount, diskSize, lastActivityDate)", async () => {
+			git.mockOutputs["worktree list --porcelain"] = [
+				"worktree /mock/root",
+				"HEAD abc1234",
+				"branch refs/heads/main",
+				"",
+			].join("\n");
+			git.mockOutputs["git show"] = "msg|author|date";
+			git.mockOutputs["rev-list --left-right --count"] = "2\t3\n";
+			git.mockOutputs["status --porcelain"] = " M a.ts\n M b.ts\n";
+			git.mockOutputs["log -1 --format=%cI"] = "2026-02-20T10:00:00+00:00\n";
+			git.mockOutputs["du -sk"] = "1024\t/mock/root\n";
+
+			const worktrees = await git.getWorktrees();
+
+			assert.strictEqual(worktrees[0].ahead, 3);
+			assert.strictEqual(worktrees[0].behind, 2);
+			assert.strictEqual(worktrees[0].changedFilesCount, 2);
+			assert.strictEqual(worktrees[0].diskSizeBytes, 1024 * 1024);
+			assert.ok(worktrees[0].lastActivityDate instanceof Date);
+		});
 	});
 
 	describe("getBranches", () => {

@@ -57,31 +57,51 @@ export class GitService {
 			}
 		}
 
-		// Parallelize verify status and dirty check
+		// Parallelize all enrichment data fetches
 		const results = await Promise.all(
 			worktrees.map(async (wt) => {
 				if (!wt.path) return null;
 
 				const isCurrent = wt.path === this.repoRoot;
-				const isDirty = await this.isWorktreeDirty(wt.path);
 
-				// Fetch rich details
-				let commitMessage: string | undefined;
-				let commitAuthor: string | undefined;
-				let commitDate: string | undefined;
-				if (wt.commit) {
-					try {
-						const details = await this.exec(
-							`git show --no-patch --format="%s|%an|%cr" ${wt.commit}`,
-						);
-						const [msg, author, date] = details.trim().split("|");
-						commitMessage = msg;
-						commitAuthor = author;
-						commitDate = date;
-					} catch {
-						// Ignore errors fetching details
-					}
-				}
+				const [
+					isDirty,
+					commitDetails,
+					aheadBehind,
+					changedFilesCount,
+					lastActivityDate,
+					diskSizeBytes,
+				] = await Promise.all([
+					this.isWorktreeDirty(wt.path),
+					wt.commit
+						? this.exec(
+								`git show --no-patch --format="%s|%an|%cr" ${wt.commit}`,
+							)
+								.then((details) => {
+									const [msg, author, date] = details
+										.trim()
+										.split("|");
+									return {
+										commitMessage: msg,
+										commitAuthor: author,
+										commitDate: date,
+									};
+								})
+								.catch(() => ({
+									commitMessage: undefined,
+									commitAuthor: undefined,
+									commitDate: undefined,
+								}))
+						: Promise.resolve({
+								commitMessage: undefined,
+								commitAuthor: undefined,
+								commitDate: undefined,
+							}),
+					this.getAheadBehind(wt.path, "main"),
+					this.getChangedFilesCount(wt.path),
+					this.getLastCommitDate(wt.path),
+					this.getDiskSize(wt.path),
+				]);
 
 				return {
 					path: wt.path,
@@ -91,9 +111,12 @@ export class GitService {
 					isDirty,
 					isLocked: !!wt.isLocked,
 					lockReason: wt.lockReason,
-					commitMessage,
-					commitAuthor,
-					commitDate,
+					...commitDetails,
+					ahead: aheadBehind.ahead,
+					behind: aheadBehind.behind,
+					changedFilesCount,
+					diskSizeBytes,
+					lastActivityDate,
 				} as Worktree;
 			}),
 		);
