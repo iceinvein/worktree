@@ -1,8 +1,5 @@
 import * as assert from "node:assert";
-import {
-	categorizeWorktree,
-	type WorktreeCategory,
-} from "../../commands/smartCleanup";
+import { categorizeWorktree } from "../../commands/smartCleanup";
 import type { Worktree } from "../../gitService";
 
 function makeWorktree(overrides: Partial<Worktree> = {}): Worktree {

@@ -1,7 +1,5 @@
 import * as vscode from "vscode";
 import type { GitService } from "../gitService";
-import { pruneWorktrees } from "./prune";
-import { removeWorktree } from "./remove";
 
 export async function checkMergedWorktrees(git: GitService) {
 	const branches = ["main", "master"];

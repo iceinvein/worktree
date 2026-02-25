@@ -68,8 +68,8 @@ describe("sessionManager", () => {
 			const loaded = await loadSession(tmpDir);
 
 			assert.ok(loaded !== null);
-			assert.strictEqual(loaded!.editors.length, 1);
-			assert.strictEqual(loaded!.editors[0].cursorLine, 10);
+			assert.strictEqual(loaded?.editors.length, 1);
+			assert.strictEqual(loaded?.editors[0].cursorLine, 10);
 		});
 
 		it("returns null when file does not exist", async () => {

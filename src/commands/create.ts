@@ -53,7 +53,7 @@ export async function createWorktree(
 			try {
 				await git.stash(`Worktree Move: ${branch}`);
 				stashAndPop = true;
-			} catch (error) {
+			} catch (_error) {
 				vscode.window.showErrorMessage(
 					"Failed to stash changes. Proceeding without bringing changes.",
 				);
@@ -99,7 +99,7 @@ export async function createWorktree(
 		if (stashAndPop) {
 			try {
 				await git.stashPop(targetPath);
-			} catch (e) {
+			} catch (_e) {
 				vscode.window.showWarningMessage(
 					"Created worktree but failed to pop stash (conflict?). Check 'git stash list'.",
 				);
