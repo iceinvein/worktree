@@ -78,9 +78,7 @@ export class GitService {
 								`git show --no-patch --format="%s|%an|%cr" ${wt.commit}`,
 							)
 								.then((details) => {
-									const [msg, author, date] = details
-										.trim()
-										.split("|");
+									const [msg, author, date] = details.trim().split("|");
 									return {
 										commitMessage: msg,
 										commitAuthor: author,
@@ -328,6 +326,20 @@ export class GitService {
 		} catch {
 			return 0;
 		}
+	}
+
+	async rebaseWorktree(
+		worktreePath: string,
+		baseBranch: string,
+	): Promise<void> {
+		await this.exec(`git -C "${worktreePath}" rebase ${baseBranch}`);
+	}
+
+	async mergeIntoWorktree(
+		worktreePath: string,
+		baseBranch: string,
+	): Promise<void> {
+		await this.exec(`git -C "${worktreePath}" merge ${baseBranch}`);
 	}
 
 	getRepoRoot(): string {

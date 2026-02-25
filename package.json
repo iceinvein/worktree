@@ -157,6 +157,11 @@
 				"command": "worktreeManager.smartCleanup",
 				"title": "Smart Cleanup",
 				"icon": "$(sparkle)"
+			},
+			{
+				"command": "worktreeManager.updateFromMain",
+				"title": "Update from Main",
+				"icon": "$(cloud-download)"
 			}
 		],
 		"menus": {
@@ -209,6 +214,11 @@
 				{
 					"command": "worktreeManager.create",
 					"when": "viewItem == branch"
+				},
+				{
+					"command": "worktreeManager.updateFromMain",
+					"when": "viewItem == worktree",
+					"group": "modification"
 				}
 			]
 		}

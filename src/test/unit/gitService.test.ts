@@ -408,7 +408,8 @@ locked reason is testing
 
 	describe("getChangedFilesCount", () => {
 		it("returns count of changed files", async () => {
-			git.mockOutputs["status --porcelain"] = " M src/a.ts\n M src/b.ts\n?? new.ts\n";
+			git.mockOutputs["status --porcelain"] =
+				" M src/a.ts\n M src/b.ts\n?? new.ts\n";
 
 			const count = await git.getChangedFilesCount("/mock/feature");
 
@@ -458,6 +459,28 @@ locked reason is testing
 			const bytes = await git.getDiskSize("/mock/feature");
 
 			assert.strictEqual(bytes, 0);
+		});
+	});
+
+	describe("rebaseWorktree", () => {
+		it("runs git rebase in worktree directory", async () => {
+			await git.rebaseWorktree("/mock/feature", "main");
+
+			assert.ok(
+				git.cmdLog.some((c) =>
+					c.includes('git -C "/mock/feature" rebase main'),
+				),
+			);
+		});
+	});
+
+	describe("mergeIntoWorktree", () => {
+		it("runs git merge in worktree directory", async () => {
+			await git.mergeIntoWorktree("/mock/feature", "main");
+
+			assert.ok(
+				git.cmdLog.some((c) => c.includes('git -C "/mock/feature" merge main')),
+			);
 		});
 	});
 });

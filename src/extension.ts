@@ -10,6 +10,7 @@ import { pruneWorktrees } from "./commands/prune";
 import { removeWorktree } from "./commands/remove";
 import { smartCleanup } from "./commands/smartCleanup";
 import { switchWorktree } from "./commands/switch";
+import { updateFromMain } from "./commands/updateFromMain";
 import { GitService } from "./gitService";
 import { StatusManager } from "./statusBar";
 import { EmptyDocumentProvider } from "./utils/emptyProvider";
@@ -129,6 +130,14 @@ export function activate(context: vscode.ExtensionContext) {
 			"worktreeManager.smartCleanup",
 			async () => {
 				await smartCleanup(git);
+				refreshAll();
+			},
+		),
+
+		vscode.commands.registerCommand(
+			"worktreeManager.updateFromMain",
+			async (item) => {
+				await updateFromMain(git, item);
 				refreshAll();
 			},
 		),
