@@ -21,15 +21,23 @@ export class WorktreeProvider implements vscode.TreeDataProvider<WorktreeItem> {
 
 	async getChildren(): Promise<WorktreeItem[]> {
 		const worktrees = await this.git.getWorktrees();
-		return worktrees.map((wt) => new WorktreeItem(wt));
+		const config = vscode.workspace.getConfiguration("worktreeManager");
+		const staleDaysThreshold = config.get<number>("staleDaysThreshold", 14);
+		return worktrees.map((wt) => new WorktreeItem(wt, staleDaysThreshold));
 	}
 }
 
 export class WorktreeItem extends vscode.TreeItem {
-	constructor(public readonly worktree: Worktree) {
+	constructor(
+		public readonly worktree: Worktree,
+		staleDaysThreshold = 14,
+	) {
 		super(worktree.branch, vscode.TreeItemCollapsibleState.None);
 
-		const state = resolveWorktreeItemState(worktree);
+		const state = resolveWorktreeItemState({
+			...worktree,
+			staleDaysThreshold,
+		});
 
 		this.contextValue = state.contextValue;
 		this.iconPath = state.iconColorId

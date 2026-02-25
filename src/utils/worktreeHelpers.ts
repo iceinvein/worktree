@@ -20,6 +20,11 @@ export function resolveWorktreeItemState(worktree: {
 	isCurrent: boolean;
 	isLocked: boolean;
 	isDirty: boolean;
+	ahead?: number;
+	behind?: number;
+	changedFilesCount?: number;
+	lastActivityDate?: Date | null;
+	staleDaysThreshold?: number;
 }): WorktreeItemState {
 	let contextValue: WorktreeItemState["contextValue"];
 	let iconId: string;
@@ -44,16 +49,37 @@ export function resolveWorktreeItemState(worktree: {
 		contextValue = "worktreeCurrentLocked";
 	}
 
+	// Stale detection (only for non-current, non-locked worktrees)
+	const threshold = worktree.staleDaysThreshold ?? 14;
+	if (
+		!worktree.isCurrent &&
+		!worktree.isLocked &&
+		isStale(worktree.lastActivityDate, threshold)
+	) {
+		iconId = "warning";
+		iconColorId = "charts.orange";
+	}
+
 	// Text indicators
 	if (worktree.isLocked) {
 		descriptionSuffix += " 🔒";
 	}
 
+	// Ahead/behind
+	const ab = formatAheadBehind(worktree.ahead ?? 0, worktree.behind ?? 0);
+	if (ab) {
+		descriptionSuffix += ` ${ab}`;
+	}
+
 	if (worktree.isDirty) {
-		descriptionSuffix += " • Modified";
-		// Yellow icon only for non-current, non-locked dirty worktrees
-		if (!worktree.isCurrent && !worktree.isLocked) {
-			iconId = "git-branch";
+		const count = worktree.changedFilesCount;
+		if (count && count > 0) {
+			descriptionSuffix += ` • ${count} changes`;
+		} else {
+			descriptionSuffix += " • Modified";
+		}
+		// Yellow icon only for non-current, non-locked, non-stale dirty worktrees
+		if (!worktree.isCurrent && !worktree.isLocked && iconId === "git-branch") {
 			iconColorId = "charts.yellow";
 		}
 	}
@@ -72,6 +98,18 @@ export function buildWorktreeTooltipMarkdown(worktree: Worktree): string {
 	if (worktree.commitMessage) md += `: ${worktree.commitMessage}`;
 	if (worktree.commitAuthor) md += `\n\nby **${worktree.commitAuthor}**`;
 	if (worktree.commitDate) md += ` (${worktree.commitDate})`;
+
+	// Ahead/behind
+	const ab = formatAheadBehind(worktree.ahead ?? 0, worktree.behind ?? 0);
+	if (ab) {
+		md += `\n\n$(git-compare) ${ab}`;
+	}
+
+	// Disk size
+	if (worktree.diskSizeBytes && worktree.diskSizeBytes > 0) {
+		md += `\n\n$(database) ${formatDiskSize(worktree.diskSizeBytes)}`;
+	}
+
 	if (worktree.isLocked) {
 		md += `\n\n$(lock) **Locked**`;
 		if (worktree.lockReason) md += `: ${worktree.lockReason}`;

@@ -19,6 +19,11 @@ function makeWorktree(overrides: Partial<Worktree> = {}): Worktree {
 		isCurrent: false,
 		isDirty: false,
 		isLocked: false,
+		ahead: 0,
+		behind: 0,
+		changedFilesCount: 0,
+		diskSizeBytes: 0,
+		lastActivityDate: new Date(),
 		...overrides,
 	};
 }
@@ -127,6 +132,57 @@ describe("resolveWorktreeItemState", () => {
 		assert.ok(state.descriptionSuffix.includes("🔒"));
 		assert.ok(state.descriptionSuffix.includes("Modified"));
 	});
+
+	it("includes ahead/behind in description suffix", () => {
+		const state = resolveWorktreeItemState({
+			isCurrent: false,
+			isLocked: false,
+			isDirty: false,
+			ahead: 3,
+			behind: 2,
+		});
+
+		assert.ok(state.descriptionSuffix.includes("↑3 ↓2"));
+	});
+
+	it("includes changed files count when dirty", () => {
+		const state = resolveWorktreeItemState({
+			isCurrent: false,
+			isLocked: false,
+			isDirty: true,
+			changedFilesCount: 5,
+		});
+
+		assert.ok(state.descriptionSuffix.includes("5 changes"));
+	});
+
+	it("shows stale warning icon", () => {
+		const old = new Date();
+		old.setDate(old.getDate() - 20);
+		const state = resolveWorktreeItemState({
+			isCurrent: false,
+			isLocked: false,
+			isDirty: false,
+			lastActivityDate: old,
+			staleDaysThreshold: 14,
+		});
+
+		assert.strictEqual(state.iconId, "warning");
+	});
+
+	it("does not show stale for current worktree", () => {
+		const old = new Date();
+		old.setDate(old.getDate() - 20);
+		const state = resolveWorktreeItemState({
+			isCurrent: true,
+			isLocked: false,
+			isDirty: false,
+			lastActivityDate: old,
+			staleDaysThreshold: 14,
+		});
+
+		assert.strictEqual(state.iconId, "check");
+	});
 });
 
 describe("buildWorktreeTooltipMarkdown", () => {
@@ -182,6 +238,22 @@ describe("buildWorktreeTooltipMarkdown", () => {
 
 		assert.ok(!md.includes("by **"));
 		assert.ok(!md.includes("$(lock)"));
+	});
+
+	it("includes disk size when present", () => {
+		const md = buildWorktreeTooltipMarkdown(
+			makeWorktree({ diskSizeBytes: 5 * 1024 * 1024 }),
+		);
+
+		assert.ok(md.includes("5.0 MB"));
+	});
+
+	it("includes ahead/behind in tooltip", () => {
+		const md = buildWorktreeTooltipMarkdown(
+			makeWorktree({ ahead: 3, behind: 1 }),
+		);
+
+		assert.ok(md.includes("↑3 ↓1"));
 	});
 });
 
