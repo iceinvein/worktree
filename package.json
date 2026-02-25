@@ -65,6 +65,12 @@
 					"type": "string",
 					"default": "",
 					"description": "Path to a script (relative to repo root) to run after creating a worktree. Falls back to .worktree-setup.sh if not set."
+				},
+				"worktreeManager.autoRefreshInterval": {
+					"type": "number",
+					"default": 30,
+					"minimum": 0,
+					"description": "Polling interval in seconds for auto-refreshing worktree and branch views. Set to 0 to disable polling (filesystem watcher and focus listener remain active)."
 				}
 			}
 		},

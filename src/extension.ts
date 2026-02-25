@@ -1,4 +1,5 @@
 import * as vscode from "vscode";
+import { AutoRefreshManager } from "./autoRefresh";
 import { BranchProvider } from "./branchProvider";
 import { checkMergedWorktrees } from "./commands/cleanup";
 import { createWorktree } from "./commands/create";
@@ -42,6 +43,10 @@ export function activate(context: vscode.ExtensionContext) {
 		worktreeProvider.refresh();
 		branchProvider.refresh();
 	};
+
+	// Auto-refresh on filesystem changes, window focus, and polling
+	const autoRefresh = new AutoRefreshManager(refreshAll);
+	context.subscriptions.push(autoRefresh);
 
 	// Register commands
 	context.subscriptions.push(
