@@ -13,13 +13,7 @@ import { smartCleanup } from "./commands/smartCleanup";
 import { switchWorktree } from "./commands/switch";
 import { updateFromMain } from "./commands/updateFromMain";
 import { GitService } from "./gitService";
-import {
-	captureCurrentSession,
-	deleteSession,
-	loadSession,
-	restoreSession,
-	saveSessionToFile,
-} from "./sessionManager";
+import { deleteSession, loadSession, restoreSession } from "./sessionManager";
 import { StatusManager } from "./statusBar";
 import { EmptyDocumentProvider } from "./utils/emptyProvider";
 import { type WorktreeItem, WorktreeProvider } from "./worktreeProvider";
@@ -200,12 +194,4 @@ export function activate(context: vscode.ExtensionContext) {
 	})();
 }
 
-export function deactivate() {
-	const workspaceRoot = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
-	if (workspaceRoot) {
-		const session = captureCurrentSession(workspaceRoot);
-		if (session) {
-			saveSessionToFile(workspaceRoot, session).catch(() => {});
-		}
-	}
-}
+export function deactivate() {}
