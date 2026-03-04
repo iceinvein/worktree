@@ -15,6 +15,7 @@ import { updateFromMain } from "./commands/updateFromMain";
 import { GitService } from "./gitService";
 import {
 	captureCurrentSession,
+	deleteSession,
 	loadSession,
 	restoreSession,
 	saveSessionToFile,
@@ -181,6 +182,7 @@ export function activate(context: vscode.ExtensionContext) {
 	(async () => {
 		const session = await loadSession(workspaceRoot);
 		if (session) {
+			await deleteSession(workspaceRoot);
 			const age = Date.now() - new Date(session.timestamp).getTime();
 			const ageStr =
 				age < 3600000

@@ -126,7 +126,7 @@ Worktree and branch views stay up to date automatically via a filesystem watcher
 | `worktreeManager.openBehavior` | `ask` | `newWindow`, `sameWindow`, or `ask` when opening a worktree. |
 | `worktreeManager.showRemoteBranches` | `true` | Show remote branches in the available branches list. |
 | `worktreeManager.postCreateScript` | `""` | Path to a script (relative to repo root) to run after creating a worktree. Falls back to `.worktree-setup.sh` if not set. |
-| `worktreeManager.autoRefreshInterval` | `30` | Polling interval in seconds for auto-refreshing views. Set to `0` to disable polling (filesystem watcher and focus listener remain active). |
+| `worktreeManager.autoRefreshInterval` | `120` | Polling interval in seconds for auto-refreshing views. Set to `0` to disable polling (filesystem watcher and focus listener remain active). |
 | `worktreeManager.baseBranch` | `main` | Base branch used for ahead/behind counts, smart cleanup, and update operations. |
 | `worktreeManager.staleDaysThreshold` | `14` | Number of days with no commits before a worktree is considered stale. |
 | `worktreeManager.envCloneConfig` | `.worktree-env.json` | Path to environment cloning config file (relative to repo root). |

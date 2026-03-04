@@ -58,7 +58,7 @@ export class AutoRefreshManager implements vscode.Disposable {
 
 	private setupPolling(): void {
 		const config = vscode.workspace.getConfiguration("worktreeManager");
-		const intervalSeconds = config.get<number>("autoRefreshInterval", 30);
+		const intervalSeconds = config.get<number>("autoRefreshInterval", 120);
 
 		if (intervalSeconds > 0) {
 			this.pollingTimer = setInterval(

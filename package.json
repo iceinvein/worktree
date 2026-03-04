@@ -68,7 +68,7 @@
 				},
 				"worktreeManager.autoRefreshInterval": {
 					"type": "number",
-					"default": 30,
+					"default": 120,
 					"minimum": 0,
 					"description": "Polling interval in seconds for auto-refreshing worktree and branch views. Set to 0 to disable polling (filesystem watcher and focus listener remain active)."
 				},

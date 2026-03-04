@@ -39,6 +39,15 @@ export async function loadSession(
 	}
 }
 
+export async function deleteSession(worktreePath: string): Promise<void> {
+	try {
+		const filePath = path.join(worktreePath, ".vscode", SESSION_FILE);
+		await fs.unlink(filePath);
+	} catch {
+		// Already gone — ignore
+	}
+}
+
 export function captureCurrentSession(
 	workspaceRoot: string,
 ): SessionData | null {
