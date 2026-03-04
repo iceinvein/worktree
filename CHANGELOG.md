@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.3.1] - 2026-03-04
+
+### Fixes
+
+- increase polling interval to 2min and delete session file after restore prompt (6d3e080)
+
 ## [0.3.0] - 2026-02-25
 
 ### Features
