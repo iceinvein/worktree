@@ -131,6 +131,33 @@ describe("AutoRefreshManager", () => {
 		}, 350);
 	});
 
+	it("throttles focus refreshes to once per 60 seconds", (done) => {
+		manager = new AutoRefreshManager(() => {
+			refreshCount++;
+		});
+
+		assert.ok(focusCallback, "should register focus listener");
+
+		// First focus should trigger refresh
+		if (focusCallback) focusCallback({ focused: true });
+
+		setTimeout(() => {
+			assert.strictEqual(refreshCount, 1, "first focus should refresh");
+
+			// Second focus immediately after should be throttled
+			if (focusCallback) focusCallback({ focused: true });
+
+			setTimeout(() => {
+				assert.strictEqual(
+					refreshCount,
+					1,
+					"second focus within 60s should be throttled",
+				);
+				done();
+			}, 350);
+		}, 350);
+	});
+
 	it("does not refresh when window loses focus", (done) => {
 		manager = new AutoRefreshManager(() => {
 			refreshCount++;

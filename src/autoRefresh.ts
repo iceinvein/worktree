@@ -4,6 +4,8 @@ export class AutoRefreshManager implements vscode.Disposable {
 	private readonly disposables: vscode.Disposable[] = [];
 	private debounceTimer: ReturnType<typeof setTimeout> | undefined;
 	private pollingTimer: ReturnType<typeof setInterval> | undefined;
+	private lastFocusRefresh = 0;
+	private static readonly FOCUS_THROTTLE_MS = 60_000;
 
 	constructor(private readonly onRefresh: () => void) {
 		this.setupFileSystemWatchers();
@@ -50,7 +52,14 @@ export class AutoRefreshManager implements vscode.Disposable {
 		this.disposables.push(
 			vscode.window.onDidChangeWindowState((state) => {
 				if (state.focused) {
-					this.debouncedRefresh();
+					const now = Date.now();
+					if (
+						now - this.lastFocusRefresh >=
+						AutoRefreshManager.FOCUS_THROTTLE_MS
+					) {
+						this.lastFocusRefresh = now;
+						this.debouncedRefresh();
+					}
 				}
 			}),
 		);
