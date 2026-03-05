@@ -131,6 +131,10 @@
 				"icon": "$(diff)"
 			},
 			{
+				"command": "worktreeManager.move",
+				"title": "Move Worktree"
+			},
+			{
 				"command": "worktreeManager.remove",
 				"title": "Remove Worktree"
 			},
@@ -216,6 +220,11 @@
 				{
 					"command": "worktreeManager.unlock",
 					"when": "viewItem == worktreeLocked || viewItem == worktreeCurrentLocked",
+					"group": "modification"
+				},
+				{
+					"command": "worktreeManager.move",
+					"when": "viewItem == worktree",
 					"group": "modification"
 				},
 				{

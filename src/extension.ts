@@ -6,6 +6,7 @@ import { checkMergedWorktrees } from "./commands/cleanup";
 import { createWorktree } from "./commands/create";
 import { diffWorktree } from "./commands/diff";
 import { lockWorktree, unlockWorktree } from "./commands/lock";
+import { moveWorktree } from "./commands/move";
 import { openWorktree } from "./commands/open";
 import { pruneWorktrees } from "./commands/prune";
 import { removeWorktree } from "./commands/remove";
@@ -102,6 +103,11 @@ export function activate(context: vscode.ExtensionContext) {
 				});
 			},
 		),
+
+		vscode.commands.registerCommand("worktreeManager.move", async (item) => {
+			const moved = await moveWorktree(git, item);
+			if (moved) refreshAll();
+		}),
 
 		vscode.commands.registerCommand("worktreeManager.remove", async (item) => {
 			const removed = await removeWorktree(git, item);

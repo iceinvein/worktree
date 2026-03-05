@@ -501,4 +501,16 @@ locked reason is testing
 			);
 		});
 	});
+
+	describe("moveWorktree", () => {
+		it("runs git worktree move with correct paths", async () => {
+			await git.moveWorktree("/old/path", "/new/path");
+
+			assert.ok(
+				git.cmdLog.some(
+					(c) => c === 'git worktree move "/old/path" "/new/path"',
+				),
+			);
+		});
+	});
 });

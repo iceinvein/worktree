@@ -204,6 +204,10 @@ export class GitService {
 		await this.exec(`git worktree unlock "${worktreePath}"`);
 	}
 
+	async moveWorktree(worktreePath: string, newPath: string): Promise<void> {
+		await this.exec(`git worktree move "${worktreePath}" "${newPath}"`);
+	}
+
 	async pruneWorktrees(): Promise<void> {
 		await this.exec("git worktree prune");
 	}
