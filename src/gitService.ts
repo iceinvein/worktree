@@ -361,6 +361,17 @@ export class GitService {
 		await this.exec(`git -C "${worktreePath}" merge ${baseBranch}`);
 	}
 
+	async getBranchBehindRemote(branch: string): Promise<number> {
+		try {
+			const output = await this.exec(
+				`git rev-list --count ${branch}..origin/${branch}`,
+			);
+			return Number.parseInt(output.trim(), 10) || 0;
+		} catch {
+			return 0;
+		}
+	}
+
 	getRepoRoot(): string {
 		return this.repoRoot;
 	}
