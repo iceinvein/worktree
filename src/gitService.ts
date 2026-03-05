@@ -299,6 +299,21 @@ export class GitService {
 		}
 	}
 
+	async getBranchAheadBehind(
+		branch: string,
+		baseBranch: string,
+	): Promise<{ ahead: number; behind: number }> {
+		try {
+			const output = await this.exec(
+				`git rev-list --left-right --count ${baseBranch}...${branch}`,
+			);
+			const [behind, ahead] = output.trim().split("\t").map(Number);
+			return { ahead: ahead || 0, behind: behind || 0 };
+		} catch {
+			return { ahead: 0, behind: 0 };
+		}
+	}
+
 	async getChangedFilesCount(worktreePath: string): Promise<number> {
 		try {
 			const output = await this.exec(

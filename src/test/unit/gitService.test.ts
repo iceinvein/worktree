@@ -513,4 +513,46 @@ locked reason is testing
 			);
 		});
 	});
+
+	describe("getBranchAheadBehind", () => {
+		it("parses ahead/behind counts for a branch vs base", async () => {
+			git.mockOutputs["rev-list --left-right --count main...feature-x"] =
+				"3\t5\n";
+
+			const result = await git.getBranchAheadBehind("feature-x", "main");
+
+			assert.strictEqual(result.ahead, 5);
+			assert.strictEqual(result.behind, 3);
+		});
+
+		it("returns zeros on error", async () => {
+			git.mockErrors["rev-list --left-right --count main...no-exist"] =
+				new Error("unknown revision");
+
+			const result = await git.getBranchAheadBehind("no-exist", "main");
+
+			assert.strictEqual(result.ahead, 0);
+			assert.strictEqual(result.behind, 0);
+		});
+	});
+
+	describe("getBranchBehindRemote", () => {
+		it("returns behind count when tracking branch exists", async () => {
+			git.mockOutputs["rev-list --count feature-x..origin/feature-x"] =
+				"3\n";
+
+			const result = await git.getBranchBehindRemote("feature-x");
+
+			assert.strictEqual(result, 3);
+		});
+
+		it("returns 0 on error (no tracking branch)", async () => {
+			git.mockErrors["rev-list --count no-track..origin/no-track"] =
+				new Error("unknown revision");
+
+			const result = await git.getBranchBehindRemote("no-track");
+
+			assert.strictEqual(result, 0);
+		});
+	});
 });
