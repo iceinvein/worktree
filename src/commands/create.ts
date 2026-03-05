@@ -4,6 +4,7 @@ import { cloneEnvironment, loadEnvCloneConfig } from "../envCloner";
 import type { GitService } from "../gitService";
 import { findScript, runPostCreateScript } from "../postCreateScript";
 import { applyThemeColor } from "../utils/theme";
+import { isValidBranchName } from "../utils/validation";
 import { resolveWorktreePath } from "../utils/worktreeHelpers";
 
 export async function createWorktree(
@@ -22,6 +23,13 @@ export async function createWorktree(
 		});
 		if (!input) return;
 		branch = input;
+	}
+
+	if (!isValidBranchName(branch)) {
+		vscode.window.showErrorMessage(
+			`Invalid branch name: "${branch}". Use only letters, numbers, hyphens, underscores, dots, and slashes.`,
+		);
+		return;
 	}
 
 	// 2. Resolve target path
