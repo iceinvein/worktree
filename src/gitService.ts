@@ -26,6 +26,9 @@ export interface Branch {
 	name: string;
 	isRemote: boolean;
 	hasWorktree: boolean;
+	ahead?: number;
+	behind?: number;
+	behindRemote?: number;
 }
 
 export class GitService {

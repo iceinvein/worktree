@@ -4,6 +4,7 @@ import type { Worktree } from "../../gitService";
 import {
 	buildWorktreeTooltipMarkdown,
 	formatAheadBehind,
+	formatBranchDescription,
 	formatDiskSize,
 	isStale,
 	resolveWorktreeItemState,
@@ -348,6 +349,74 @@ describe("isStale", () => {
 
 	it("returns false for null date", () => {
 		assert.strictEqual(isStale(null, 14), false);
+	});
+});
+
+describe("formatBranchDescription", () => {
+	it("shows ahead/behind base and behind remote", () => {
+		const result = formatBranchDescription({
+			isRemote: false,
+			ahead: 2,
+			behind: 1,
+			behindRemote: 3,
+			baseBranchName: "main",
+		});
+		assert.strictEqual(result, "↑2 ↓1 main · ↓3 remote");
+	});
+
+	it("shows only base ahead/behind when no remote behind", () => {
+		const result = formatBranchDescription({
+			isRemote: false,
+			ahead: 1,
+			behind: 0,
+			behindRemote: 0,
+			baseBranchName: "main",
+		});
+		assert.strictEqual(result, "↑1 main");
+	});
+
+	it("shows only remote behind when at base", () => {
+		const result = formatBranchDescription({
+			isRemote: false,
+			ahead: 0,
+			behind: 0,
+			behindRemote: 5,
+			baseBranchName: "main",
+		});
+		assert.strictEqual(result, "↓5 remote");
+	});
+
+	it("returns remote for remote branches with no data", () => {
+		const result = formatBranchDescription({
+			isRemote: true,
+			ahead: 0,
+			behind: 0,
+			behindRemote: 0,
+			baseBranchName: "main",
+		});
+		assert.strictEqual(result, "remote");
+	});
+
+	it("returns empty string when all zeros and local", () => {
+		const result = formatBranchDescription({
+			isRemote: false,
+			ahead: 0,
+			behind: 0,
+			behindRemote: 0,
+			baseBranchName: "main",
+		});
+		assert.strictEqual(result, "");
+	});
+
+	it("appends remote label to remote branches with data", () => {
+		const result = formatBranchDescription({
+			isRemote: true,
+			ahead: 3,
+			behind: 0,
+			behindRemote: 0,
+			baseBranchName: "main",
+		});
+		assert.strictEqual(result, "↑3 main · remote");
 	});
 });
 

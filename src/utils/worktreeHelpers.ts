@@ -147,6 +147,35 @@ export function formatAheadBehind(ahead: number, behind: number): string {
 }
 
 /**
+ * Formats the description string for a branch tree item.
+ * Shows ahead/behind vs baseBranch and behind remote tracking branch.
+ */
+export function formatBranchDescription(opts: {
+	isRemote: boolean;
+	ahead: number;
+	behind: number;
+	behindRemote: number;
+	baseBranchName: string;
+}): string {
+	const parts: string[] = [];
+
+	const ab = formatAheadBehind(opts.ahead, opts.behind);
+	if (ab) {
+		parts.push(`${ab} ${opts.baseBranchName}`);
+	}
+
+	if (opts.behindRemote > 0) {
+		parts.push(`↓${opts.behindRemote} remote`);
+	} else if (opts.isRemote && parts.length === 0) {
+		return "remote";
+	} else if (opts.isRemote) {
+		parts.push("remote");
+	}
+
+	return parts.join(" · ");
+}
+
+/**
  * Returns true if the given date is older than `thresholdDays` days ago.
  */
 export function isStale(
