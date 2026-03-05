@@ -72,50 +72,64 @@ export async function createWorktree(
 
 	// 4. Create it
 	try {
-		await git.createWorktree(branch, targetPath);
+		const result = await vscode.window.withProgress(
+			{
+				location: vscode.ProgressLocation.Notification,
+				title: `Creating worktree for ${branch}...`,
+				cancellable: false,
+			},
+			async (progress) => {
+				await git.createWorktree(branch, targetPath);
+				progress.report({ message: "Applying theme..." });
 
-		// NEW: Apply theme
-		await applyThemeColor(targetPath, branch);
+				await applyThemeColor(targetPath, branch);
 
-		// Clone environment files if configured
-		const envConfigName = config.get<string>(
-			"envCloneConfig",
-			".worktree-env.json",
+				// Clone environment files if configured
+				const envConfigName = config.get<string>(
+					"envCloneConfig",
+					".worktree-env.json",
+				);
+				const envConfig = await loadEnvCloneConfig(repoRoot, envConfigName);
+				if (envConfig) {
+					progress.report({ message: "Cloning environment..." });
+					await cloneEnvironment(repoRoot, targetPath, envConfig);
+				}
+
+				// Run post-create script if configured
+				const postCreateSetting = config.get<string>("postCreateScript", "");
+				const scriptPath = await findScript(repoRoot, postCreateSetting);
+				if (scriptPath) {
+					progress.report({ message: "Running setup script..." });
+					const scriptResult = await runPostCreateScript(
+						scriptPath,
+						repoRoot,
+						targetPath,
+						branch,
+					);
+					if (!scriptResult.success) {
+						vscode.window.showWarningMessage(
+							`Post-create script failed: ${scriptResult.error}`,
+						);
+					}
+				}
+
+				if (stashAndPop) {
+					progress.report({ message: "Applying stashed changes..." });
+					try {
+						await git.stashPop(targetPath);
+					} catch (_e) {
+						vscode.window.showWarningMessage(
+							"Created worktree but failed to pop stash (conflict?). Check 'git stash list'.",
+						);
+					}
+				}
+
+				return targetPath;
+			},
 		);
-		const envConfig = await loadEnvCloneConfig(repoRoot, envConfigName);
-		if (envConfig) {
-			await cloneEnvironment(repoRoot, targetPath, envConfig);
-		}
 
-		// Run post-create script if configured
-		const postCreateSetting = config.get<string>("postCreateScript", "");
-		const scriptPath = await findScript(repoRoot, postCreateSetting);
-		if (scriptPath) {
-			const result = await runPostCreateScript(
-				scriptPath,
-				repoRoot,
-				targetPath,
-				branch,
-			);
-			if (!result.success) {
-				vscode.window.showWarningMessage(
-					`Post-create script failed: ${result.error}`,
-				);
-			}
-		}
-
-		if (stashAndPop) {
-			try {
-				await git.stashPop(targetPath);
-			} catch (_e) {
-				vscode.window.showWarningMessage(
-					"Created worktree but failed to pop stash (conflict?). Check 'git stash list'.",
-				);
-			}
-		}
-
-		vscode.window.showInformationMessage(`Worktree created: ${targetPath}`);
-		return targetPath;
+		vscode.window.showInformationMessage(`Worktree created: ${result}`);
+		return result;
 	} catch (err) {
 		vscode.window.showErrorMessage(
 			`Failed to create worktree: ${(err as Error).message}`,
