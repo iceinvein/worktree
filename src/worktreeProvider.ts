@@ -20,10 +20,12 @@ export class WorktreeProvider implements vscode.TreeDataProvider<WorktreeItem> {
 	}
 
 	async getChildren(): Promise<WorktreeItem[]> {
-		const worktrees = await this.git.getWorktrees();
 		const config = vscode.workspace.getConfiguration("worktreeManager");
 		const staleDaysThreshold = config.get<number>("staleDaysThreshold", 14);
-		return worktrees.map((wt) => new WorktreeItem(wt, staleDaysThreshold));
+		const baseBranch = config.get<string>("baseBranch", "main");
+		return (await this.git.getWorktrees(baseBranch)).map(
+			(wt) => new WorktreeItem(wt, staleDaysThreshold),
+		);
 	}
 }
 

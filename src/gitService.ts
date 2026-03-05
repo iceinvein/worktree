@@ -31,7 +31,7 @@ export interface Branch {
 export class GitService {
 	constructor(private repoRoot: string) {}
 
-	async getWorktrees(): Promise<Worktree[]> {
+	async getWorktrees(baseBranch = "main"): Promise<Worktree[]> {
 		const output = await this.exec("git worktree list --porcelain");
 		const worktrees: Partial<Worktree>[] = [];
 		let current: Partial<Worktree> = {};
@@ -95,7 +95,7 @@ export class GitService {
 								commitAuthor: undefined,
 								commitDate: undefined,
 							}),
-					this.getAheadBehind(wt.path, "main"),
+					this.getAheadBehind(wt.path, baseBranch),
 					this.getChangedFilesCount(wt.path),
 					this.getLastCommitDate(wt.path),
 					this.getDiskSize(wt.path),

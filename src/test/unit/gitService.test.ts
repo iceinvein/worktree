@@ -198,6 +198,24 @@ locked reason is testing
 			assert.strictEqual(worktrees[0].commitDate, "3 days ago");
 		});
 
+		it("uses provided baseBranch for ahead/behind", async () => {
+			git.mockOutputs["worktree list --porcelain"] = [
+				"worktree /mock/root",
+				"HEAD abc1234",
+				"branch refs/heads/main",
+				"",
+			].join("\n");
+			git.mockOutputs["git show"] = "msg|author|date";
+			git.mockOutputs["rev-list --left-right --count"] = "1\t2\n";
+
+			await git.getWorktrees("develop");
+
+			assert.ok(
+				git.cmdLog.some((c) => c.includes("develop...HEAD")),
+				"should use 'develop' as baseBranch in rev-list command",
+			);
+		});
+
 		it("populates enrichment fields (ahead/behind, changedFilesCount, diskSize, lastActivityDate)", async () => {
 			git.mockOutputs["worktree list --porcelain"] = [
 				"worktree /mock/root",
