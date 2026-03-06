@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.3.3] - 2026-03-06
+
+### Features
+
+- show ahead/behind badges on branch items (42f251c)
+- add Branch enrichment fields and formatBranchDescription helper (e98f61e)
+- add getBranchBehindRemote method to GitService (a8a7ff6)
+- add getBranchAheadBehind method to GitService (d7ea103)
+- add move worktree command (409dbb9)
+- show progress notification during worktree creation (761f243)
+### Fixes
+
+- validate branch names to prevent shell injection (c7abc60)
+- use baseBranch setting for ahead/behind counts in worktree list (f0ecb7c)
+- throttle focus-triggered refresh to once per 60 seconds (cee7255)
+
 ## [0.3.1] - 2026-03-04
 
 ### Fixes
